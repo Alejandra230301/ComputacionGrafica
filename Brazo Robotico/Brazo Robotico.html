@@ -15,14 +15,15 @@
     </head>
     <body>
         <div id="info">Brazo Robotico<br/>
-            Usar flecha arriba y abajo para trasladar.<br/>
-            Usar flechas laterales para rotar.<br/>
+            Usar flecha arriba y abajo para trasladar la base.<br/>
+            Usar flechas laterales para rotar la primera esfera
+			Usar teclas 4 y 6 para subir o bajar la garra.<br/>
         </div>
     <script src="js/three.min.js"></script>
     <script>
 		var scene, aspect, camera, renderer;
 		var startTime = Date.now();
-		var base, esf1, esf2;
+		var base, esf1, esf2, base1;
 		var cil1, cil2;
 		
 		var upArrow = false;
@@ -30,8 +31,8 @@
 		var leftArrow = false;
 		var rightArrow = false;
         var rot1 = false;
-        var rot2 = false;		
-		
+        var rot2 = false;
+				
 		init();
 		animate();
 		//FUNCION PARA GENERAR CILINDROS
@@ -187,25 +188,36 @@
             var arrowZ = new THREE.ArrowHelper( z, origin, arrowSize, colorB );
 			
 			//CREAR LAS GEOMETRÍAS
-
+            var geoCilin = new THREE.Geometry();
+	        var res = 25;
+            for( var i = 0; i < res; i++){
+                for( var j = 0; j < res; j++){
+                    var punto = new THREE.Vector3();
+                    punto.x = 2 * Math.cos( ( j * 2 * Math.PI )/res);
+                    punto.y = 1.5 * i/res;
+                    punto.z = 2 * Math.sin( ( j * 2 * Math.PI )/res);
+                    geoCilin.vertices.push( punto );
+					}
+				}
             //Punto
 			
 			//CREAR LOS MATERIALES
 			//CREAR LOS OBJETOS
+			base1 = new THREE.Line( geoCilin , matLinea );
 			var matLinea = new THREE.LineBasicMaterial( { color: 0x3E3E3E } );
 			var matEs = new THREE.LineBasicMaterial( { color: 0x333366 } );
 			var matPrueba = new THREE.LineBasicMaterial ( {color: 0xFE801E });
-			var base = new THREE.Line( Cilindro(1.5, 2,25) , matLinea );
-			var espr = new THREE.Line( Espiral(2.01,1.5), matLinea );
-			var esf1 = new THREE.Line( Esfera(1), matLinea );
-			var esf2 = new THREE.Line( Esfera(1), matLinea );
-			var cil1 = new THREE.Line( Cilindro(3,1,50), matPrueba);
-			var cil2 = new THREE.Line( Cilindro(3.5,1,50), matPrueba);
-			var con0 = new THREE.Line(Cono(2,2,50), matPrueba);
+			base = new THREE.Line( Cilindro(1.5, 2,25) , matLinea );
+			espr = new THREE.Line( Espiral(2.01,1.5), matLinea );
+			esf1 = new THREE.Line( Esfera(1), matLinea );
+			esf2 = new THREE.Line( Esfera(1), matLinea );
+			cil1 = new THREE.Line( Cilindro(3,1,50), matPrueba);
+			cil2 = new THREE.Line( Cilindro(3.5,1,50), matPrueba);
+			con0 = new THREE.Line(Cono(2,2,50), matPrueba);
 			//UBICACIÓN EN EL ESPACIO DE LOS OBJETOS
 			esf1.applyMatrix( new THREE.Matrix4().makeTranslation(0,1.2,0) );
 			cil1.applyMatrix( new THREE.Matrix4().makeTranslation(0,0.2,0));
-			esf1.rotation.z = 0.6;
+			esf1.rotation.z = -1.2;
 			//cil1.rotation.z = -0.2;
 			con0.applyMatrix( new THREE.Matrix4().makeTranslation(0,1.5,0));
 			esf2.applyMatrix( new THREE.Matrix4().makeTranslation(0,3,0));
@@ -229,6 +241,7 @@
 		  	scene.add( arrowZ );	
 			scene.add( base );
 
+
 			
 			camera.position.x = 7;
 			camera.position.y = 20;	 
@@ -244,6 +257,24 @@
     }
     
     function render(){
+	    if(upArrow){
+		base.position.x += 0.2;
+		}
+		if(downArrow){
+		base.position.x -= 0.2;
+		}
+		if(leftArrow){
+		esf1.rotation.y += 0.1;
+		}
+		if(rightArrow){
+		esf1.rotation.y -= 0.1;
+		}
+		if(rot1){
+		esf2.rotation.z += 0.1;
+		}
+		if(rot2){
+		esf2.rotation.z -= 0.1;
+		}
         renderer.render( scene, camera );
     }
     </script>
