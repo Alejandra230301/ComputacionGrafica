@@ -23,8 +23,8 @@
     <script>
 		var scene, aspect, camera, renderer;
 		var startTime = Date.now();
-		var base, esf1, esf2, base1;
-		var cil1, cil2;
+		var base, esf1, esf2, esf3;
+		var cil1, cil2, pin;
 		
 		var upArrow = false;
 		var downArrow = false;
@@ -97,6 +97,20 @@
 				}
 			}
 		return geoEspiral;
+		}
+		function Pinza(){
+			 var geosemicirculo = new THREE.Geometry();
+            var res = 50.0;
+            for( var i = 0; i < res; i++){
+                for( var j = 0; j < res; j++){
+                var punto = new THREE.Vector3();
+                    punto.x = 1.0  * Math.cos( (  2 * Math.PI ) ) * Math.cos((j* Math.PI )/res) ;
+                    punto.y = 1.0 * Math.cos((j*Math.PI )/res);
+                    punto.z = (1.0) * Math.sin( (2 * Math.PI ) ) *Math.sin ((j*Math.PI )/res) ;
+                    geosemicirculo.vertices.push( punto );
+            }
+		}
+			return geosemicirculo;
 		}
 		
 		function init(){
@@ -188,22 +202,11 @@
             var arrowZ = new THREE.ArrowHelper( z, origin, arrowSize, colorB );
 			
 			//CREAR LAS GEOMETRÍAS
-            var geoCilin = new THREE.Geometry();
-	        var res = 25;
-            for( var i = 0; i < res; i++){
-                for( var j = 0; j < res; j++){
-                    var punto = new THREE.Vector3();
-                    punto.x = 2 * Math.cos( ( j * 2 * Math.PI )/res);
-                    punto.y = 1.5 * i/res;
-                    punto.z = 2 * Math.sin( ( j * 2 * Math.PI )/res);
-                    geoCilin.vertices.push( punto );
-					}
-				}
             //Punto
 			
 			//CREAR LOS MATERIALES
 			//CREAR LOS OBJETOS
-			base1 = new THREE.Line( geoCilin , matLinea );
+			
 			var matLinea = new THREE.LineBasicMaterial( { color: 0x3E3E3E } );
 			var matEs = new THREE.LineBasicMaterial( { color: 0x333366 } );
 			var matPrueba = new THREE.LineBasicMaterial ( {color: 0xFE801E });
@@ -211,6 +214,8 @@
 			espr = new THREE.Line( Espiral(2.01,1.5), matLinea );
 			esf1 = new THREE.Line( Esfera(1), matLinea );
 			esf2 = new THREE.Line( Esfera(1), matLinea );
+			esf3 = new THREE.Line( Esfera(1), matLinea );
+			pin = new THREE.Line( Pinza(), matPrueba );
 			cil1 = new THREE.Line( Cilindro(3,1,50), matPrueba);
 			cil2 = new THREE.Line( Cilindro(3.5,1,50), matPrueba);
 			con0 = new THREE.Line(Cono(2,2,50), matPrueba);
@@ -221,7 +226,10 @@
 			//cil1.rotation.z = -0.2;
 			con0.applyMatrix( new THREE.Matrix4().makeTranslation(0,1.5,0));
 			esf2.applyMatrix( new THREE.Matrix4().makeTranslation(0,3,0));
+			esf3.applyMatrix( new THREE.Matrix4().makeTranslation(0,3.7,0));
+			pin.applyMatrix( new THREE.Matrix4().makeTranslation(0,3,0));
 			cil2.applyMatrix( new THREE.Matrix4().makeTranslation(0,0.3,0.1));
+
 			esf2.rotation.z = 0.7;
 			//PADRE E HIJO
 			
@@ -231,6 +239,8 @@
 			esf1.add(cil1);
 			cil1.add(esf2);
 			esf2.add(cil2);
+			cil2.add(esf3);
+			esf3.add(pin);
 
 		  
 		  	//AGREGAR A LA ESCENA
@@ -243,7 +253,7 @@
 
 
 			
-			camera.position.x = 7;
+			camera.position.x = 20;
 			camera.position.y = 20;	 
 		  	camera.position.z = 20;
 			
