@@ -200,7 +200,19 @@
 			   0  ,  1 , 0 , 0,
 			  -sen,  0 , cos , tx*sen-tz*cos+tz,
 			   0  ,  0 , 0 , 1);
-			   
+		
+		//MATRIZ DE REFLEXIÓN
+		// (1 0 0) YZ - (0 1 0) XZ - (0 0 1) XY
+		var rf = new THREEE.Matrix4();
+		rf.set(1 - 2*nx^2, -2*nx*ny, -2*nx*nz,
+		       -2*nx*ny, 1 - 2*ny^2 -2*ny*nz,
+			   -2*nx*z, -2*ny*nz, 1 - 2*nz^2 );
+		//MATRIZ DE SHEAR
+		var sh = new THREE.Matrix4();
+		sh.set( 1, Syx, Szx, 0,
+		        Sxy, 1, Szy, 0,
+				Sxz, Syz, 1, 0, 
+				0 , 0, 0 , 1);
 			triangulo.applyMatrix(rx);
 			triangulo.elementsNeedUpdate = true;
 		renderer.render( scene, camera );
