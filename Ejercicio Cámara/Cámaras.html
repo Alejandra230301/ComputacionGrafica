@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Brazo Robotico</title>
+        <title>Cámaras</title>
         <style>
             html, body { margin: 0; padding: 0; overflow: hidden; }
             #info {
@@ -14,24 +14,18 @@
         </style>
     </head>
     <body>
-        <div id="info">Brazo Robotico<br/>
-            Usar flecha arriba y abajo para trasladar la base.<br/>
-            Usar flechas laterales para rotar la primera esfera
-			Usar teclas 4 y 6 para subir o bajar la garra.<br/>
-        </div>
-    <script src="js/three.min.js"></script>
-    <script>
-		var scene, aspect, camera, renderer;
+        <script src="js/three.min.js"></script>
+        <script src="js/controls/OrbitControls.js"></script>
+        <script src='js/libs/dat.gui.min.js'></script>
+        <script>
+
+		var scene, aspecto, ascpectp, renderer;
+        var camera, camera1, camera2, camera3, camera5;
+		var mapWidth = 320, mapHeight = 240;
+        var w = window.innerWidth/3 , h = window.innerHeight/2;
 		var startTime = Date.now();
-		var base, esf1, esf2, esf3;
-		var cil1, cil2, pin;
-		
-		var upArrow = false;
-		var downArrow = false;
-		var leftArrow = false;
-		var rightArrow = false;
-        var rot1 = false;
-        var rot2 = false;
+		var base, esf1, esf2, base1;
+		var cil1, cil2;
 				
 		init();
 		animate();
@@ -70,7 +64,7 @@
 		//FUNCION PARA GENERAR ESFERAS 
 	    function Esfera(radio){
 		    var geoEsfera = new THREE.Geometry();
-			var res = 125;
+			var res = 200;
 			for( var i = 0; i < res; i++){
                 for( var j = 0; j < res; j++){
 				var punto = new THREE.Vector3();
@@ -98,79 +92,19 @@
 			}
 		return geoEspiral;
 		}
-		function Pinza(){
-			 var geosemicirculo = new THREE.Geometry();
-            var res = 50.0;
-            for( var i = 0; i < res; i++){
-                for( var j = 0; j < res; j++){
-                var punto = new THREE.Vector3();
-                    punto.x = 1.0  * Math.cos( (  2 * Math.PI ) ) * Math.cos((j* Math.PI )/res) ;
-                    punto.y = 1.0 * Math.cos((j*Math.PI )/res);
-                    punto.z = (1.0) * Math.sin( (2 * Math.PI ) ) *Math.sin ((j*Math.PI )/res) ;
-                    geosemicirculo.vertices.push( punto );
-            }
-		}
-			return geosemicirculo;
-		}
 		
 		function init(){
 			scene = new THREE.Scene();
-			aspect = window.innerWidth / window.innerHeight;
-			camera = new THREE.PerspectiveCamera( 45, aspect, 0.1, 1000);
+            scene.background = new THREE.Color( 0x9c9c9c  );
+			aspecto = (window.innerWidth/3) / (window.innerHeight/2);
+			aspectp = (window.innerWidth) / (window.innerHeight/2);
+			camera = new THREE.PerspectiveCamera( 45, aspectp, 0.1, 1000);
 			renderer = new THREE.WebGLRenderer();
 			renderer.setSize( window.innerWidth, window.innerHeight );
+            var frustumSize = 10;
 			document.body.appendChild( renderer.domElement );
+            controls = new THREE.OrbitControls( camera, renderer.domElement );
 		    //EVENTO DE TECLADO
-			
-		    var onKeyDown = function ( event ) {
-				switch ( event.keyCode ) {
-					case 38: // ROTAR BASE (FLECHA ARRIBA)
-						upArrow = true;
-						break;
-					case 40: // ROTAR BASE (FLECHA ABAJO)
-						downArrow = true;
-						break;
-					case 37: // ROTAR ESFERA1 (FLECHA IZQUIERDA)
-						leftArrow = true;
-						break;
-					case 39: // ROTAR ESFERA1 (FLECHA DERECHA)
-						rightArrow = true;
-						break;
-					case 100: // ROTAR ESFERA2 (NUM 4)
-						rot1 = true;
-						break;
-					case 102: // ROTAR ESFERA2 (NUM 6)
-						rot2 = true;
-						break;
-					}
-				};
-			var onKeyUp = function ( event ) {
-				switch ( event.keyCode ) {
-					case 38: // ROTADOR BASE
-						upArrow = false;
-						break;
-					case 40: // ROTADOR BASE
-						downArrow = false;
-						break;
-					case 37: // ROTADOR ESFERA 1
-						leftArrow = false;
-						break;
-					case 39: // ROTADOR ESFERA 1
-						rightArrow = false;
-						break;
-					case 100: // ROTADOR ESFERA 2
-						rot1 = false;
-						break;
-					case 102: // ROTADOR ESFERA 2
-						rot2 = false;
-						break;
-				}
-			};	  	
-			
-			document.addEventListener( 'keydown', onKeyDown, false );
-			document.addEventListener( 'keyup', onKeyUp, false );
-			
-						
 					
 			var size = 10;
 			var arrowSize = 1;
@@ -201,35 +135,70 @@
             var arrowY = new THREE.ArrowHelper( y, origin, arrowSize, colorG );
             var arrowZ = new THREE.ArrowHelper( z, origin, arrowSize, colorB );
 			
-			//CREAR LAS GEOMETRÍAS
-            //Punto
-			
+            //SE CREA LAs CAMARAs ORTOGONAL
+			camera1 = new THREE.OrthographicCamera( frustumSize * aspecto / - 2,  //left — Camera frustum left plane.
+                                                    frustumSize * aspecto / 2,    //right — Camera frustum right plane.
+                                                    frustumSize / 2,             //top — Camera frustum top plane.
+                                                    frustumSize / - 2,           //bottom — Camera frustum bottom plane.
+                                                    1,                           //near — Camera frustum near plane.
+                                                    10 );
+	        var helper1 = new THREE.CameraHelper( camera1 );
+           
+            
+            camera2 = new THREE.OrthographicCamera( frustumSize * aspecto / - 2,  //left — Camera frustum left plane.
+                                                    frustumSize * aspecto / 2,    //right — Camera frustum right plane.
+                                                    frustumSize / 2,             //top — Camera frustum top plane.
+                                                    frustumSize / - 2,           //bottom — Camera frustum bottom plane.
+                                                    1,                           //near — Camera frustum near plane.
+                                                    10 );
+			var helper2 = new THREE.CameraHelper( camera2 );
+            camera3 = new THREE.OrthographicCamera( frustumSize * aspecto / - 2,  //left — Camera frustum left plane.
+                                                    frustumSize * aspecto / 2,    //right — Camera frustum right plane.
+                                                    frustumSize / 2,             //top — Camera frustum top plane.
+                                                    frustumSize / - 2,           //bottom — Camera frustum bottom plane.
+                                                    1,                           //near — Camera frustum near plane.
+                                                    10 );
+			var helper3 = new THREE.CameraHelper( camera3 );
+            
+           
+            // CREAR CAMARA EN PERSPECTIVA
+            var width = 16.0;
+			var height = 9.0;
+			var FOV = 45.0;			//Ángulo de apertura
+			var sinFOV = Math.sin((FOV/2.0)*Math.PI/180.0);
+			var aR = width/height;	//AspectRatio
+			var nearZ = 1;
+			var farZ = 10;
+			var COA = new THREE.Vector3(-5,2,0);
+			var planeGeometry = new THREE.PlaneGeometry(width, height);
+            
+            
+            camera5 = new THREE.PerspectiveCamera( FOV, aR, nearZ, farZ );
+            var helper = new THREE.CameraHelper( camera5 );
+            scene.add( helper );
+         
 			//CREAR LOS MATERIALES
 			//CREAR LOS OBJETOS
-			
 			var matLinea = new THREE.LineBasicMaterial( { color: 0x3E3E3E } );
 			var matEs = new THREE.LineBasicMaterial( { color: 0x333366 } );
 			var matPrueba = new THREE.LineBasicMaterial ( {color: 0xFE801E });
-			base = new THREE.Line( Cilindro(1.5, 2,25) , matLinea );
+			base = new THREE.Line( Cilindro(1.5, 2,200) , matLinea );
 			espr = new THREE.Line( Espiral(2.01,1.5), matLinea );
 			esf1 = new THREE.Line( Esfera(1), matLinea );
 			esf2 = new THREE.Line( Esfera(1), matLinea );
-			esf3 = new THREE.Line( Esfera(1), matLinea );
-			pin = new THREE.Line( Pinza(), matPrueba );
-			cil1 = new THREE.Line( Cilindro(3,1,50), matPrueba);
-			cil2 = new THREE.Line( Cilindro(3.5,1,50), matPrueba);
-			con0 = new THREE.Line(Cono(2,2,50), matPrueba);
+			cil1 = new THREE.Line( Cilindro(3,1,250), matPrueba);
+			cil2 = new THREE.Line( Cilindro(3.5,1,250), matPrueba);
+			con0 = new THREE.Line(Cono(2,2,200), matPrueba);
 			//UBICACIÓN EN EL ESPACIO DE LOS OBJETOS
+			base.position.z = -10;
+			base.position.y= -3;
 			esf1.applyMatrix( new THREE.Matrix4().makeTranslation(0,1.2,0) );
 			cil1.applyMatrix( new THREE.Matrix4().makeTranslation(0,0.2,0));
-			esf1.rotation.z = -1.2;
+			esf1.rotation.z = 0.8;
 			//cil1.rotation.z = -0.2;
 			con0.applyMatrix( new THREE.Matrix4().makeTranslation(0,1.5,0));
 			esf2.applyMatrix( new THREE.Matrix4().makeTranslation(0,3,0));
-			esf3.applyMatrix( new THREE.Matrix4().makeTranslation(0,3.7,0));
-			pin.applyMatrix( new THREE.Matrix4().makeTranslation(0,3,0));
 			cil2.applyMatrix( new THREE.Matrix4().makeTranslation(0,0.3,0.1));
-
 			esf2.rotation.z = 0.7;
 			//PADRE E HIJO
 			
@@ -239,8 +208,6 @@
 			esf1.add(cil1);
 			cil1.add(esf2);
 			esf2.add(cil2);
-			cil2.add(esf3);
-			esf3.add(pin);
 
 		  
 		  	//AGREGAR A LA ESCENA
@@ -251,11 +218,10 @@
 		  	scene.add( arrowZ );	
 			scene.add( base );
 
-
 			
-			camera.position.x = 20;
-			camera.position.y = 20;	 
-		  	camera.position.z = 20;
+			camera.position.x = 0;
+			camera.position.y = 0;	 
+		  	camera.position.z = 10;
 			
 		  	camera.lookAt( origin );
 			}
@@ -263,30 +229,31 @@
     
     function animate() {
         render();
+    
         requestAnimationFrame( animate );
     }
     
     function render(){
-	    if(upArrow){
-		base.position.x += 0.2;
+            renderer.setViewport( 0, 0 , w, h );
+            renderer.setScissor( 0, 0 , w, h );
+            renderer.setScissorTest( true );
+            renderer.render( scene, camera1 );
+            renderer.setViewport( w, 0 , w, h );
+            renderer.setScissor( w, 0 , w, h );
+            renderer.setScissorTest( true );
+            renderer.render( scene, camera2 );
+            renderer.setViewport( 2*w, 0 , w, h );
+            renderer.setScissor( 2*w, 0 , w, h);
+            renderer.setScissorTest( true );
+            renderer.render( scene, camera2 );
+            renderer.setViewport( 0, h, w*3, h );
+            renderer.setScissor( 0, h, w*3, h );
+            renderer.render( scene, camera );
+			//renderer.setViewport( 10, h - mapHeight - 10, mapWidth, mapHeight );
+           // renderer.setScissor( 10, h - mapHeight - 10, mapWidth, mapHeight );
+            //renderer.setScissorTest( true );
+            //renderer.render( scene, camera5);
 		}
-		if(downArrow){
-		base.position.x -= 0.2;
-		}
-		if(leftArrow){
-		esf1.rotation.y += 0.1;
-		}
-		if(rightArrow){
-		esf1.rotation.y -= 0.1;
-		}
-		if(rot1){
-		esf2.rotation.z += 0.1;
-		}
-		if(rot2){
-		esf2.rotation.z -= 0.1;
-		}
-        renderer.render( scene, camera );
-    }
     </script>
   </body>
 </html>
