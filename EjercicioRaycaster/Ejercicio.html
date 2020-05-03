@@ -28,7 +28,7 @@
 			scene.background = new THREE.Color( 0xAAAAAA );
 			aspect = window.innerWidth / window.innerHeight;
 			camera = new THREE.PerspectiveCamera( 20, aspect, 0.1, 1000);
-			camera2 = new THREE.PerspectiveCamera( 40, 1.33, 0.1, 50);
+			camera2 = new THREE.PerspectiveCamera( 40, 1.33, 0.1, 49);
             var helper = new THREE.CameraHelper( camera2 );
             scene.add( helper );
 			renderer = new THREE.WebGLRenderer({antialias: true});
@@ -102,6 +102,7 @@
             var geometry2 = new THREE.CylinderGeometry( 7, 7, 5, 10 );
             var geometry3 = new THREE.BoxGeometry( 3, 3, 3 );
 			var meshMaterial = new THREE.MeshStandardMaterial( {color: 0x00ff00} );
+			var meshMaterial1 = new THREE.MeshStandardMaterial( {color: 0x0000ff} );
 			meshMaterial.vertexColors = THREE.FaceColors;
 			meshMaterial.side = THREE.FrontSide;
 
@@ -116,11 +117,13 @@
 			mesh = new THREE.Mesh( geometry, meshMaterial );
             mesh.position.z = -20;
             mesh2 = new THREE.Mesh( geometry2, meshMaterial );
-            mesh3 = new THREE.Mesh( geometry3, meshMaterial );
+            mesh3 = new THREE.Mesh( geometry3, meshMaterial1 );
             mesh2.position.x = -15;
             mesh2.position.z = -20;
-            mesh3.position.z = -60;
+            mesh3.position.z = -55;
             mesh3.position.x = 10;
+            mesh3.position.y = 10;
+           // mesh3.position.y = 20;
 			var helper = new THREE.FaceNormalsHelper( mesh, 2, 0x0000ff, 1 );
             var helper2 = new THREE.FaceNormalsHelper( mesh2, 2, 0x0000ff, 1 );
             var helper3 = new THREE.FaceNormalsHelper( mesh3, 2, 0x0000ff, 1 );
@@ -131,40 +134,41 @@
 
 
 
-			scene.add(mesh);
-            scene.add(mesh2);
-            scene.add(mesh3);
-			scene.add(helper);
-            scene.add(helper2);
-            scene.add(helper3);
+			
             //group.add(plane);
 			//group.translateZ(-20);
 			//scene.add( group );
 
             var contador = 0;
             var arreglo = [];
-
+			
             for(j = 0; j <= 36; j++){ //Ciclo para recorrer en y
-                    for(i = 0; i <= 48; i++){ //Ciclo para recorrer en x
+                for(i = 0; i <= 48; i++){ //Ciclo para recorrer en x
                     vector2 = new THREE.Vector3(24-i, 18-j, -50); //Vector destino
                     raycaster.set( vector, vector2.normalize() ); //Origen y destino del raycaster
                     intersects = raycaster.intersectObjects( objetos ); 
                     var aux = intersects.length;
-                    //arreglo.push(intersects);                   
-                    if(aux > 0){ 
-                        intersects[0].object.material.color.set( color_2 );
-                    for(var x= 0; x < intersects[ 0 ].object.geometry.faces.length; x++){
-                        if(vector.dot(intersects[0].object.geometry.faces[x].normal) <= 0){ 
-                            intersects[0].object.geometry.faces.splice(x,1);
-                            mesh.geometry.elementsNeedUpdate = true;
-                        }
-                    }
+					console.log(intersects);
+                    arreglo.push(intersects);     	
+					if(aux > 0 && -50 < intersects[aux-1].object.position.z && 0.1 > intersects[aux-1].object.position.z && -24<= intersects[aux-1].object.position.x && 24>= intersects[aux-1].object.position.x && -18<= intersects[aux-1].object.position.y && 18 >= intersects[aux-1].object.position.y){ 
+						intersects[aux-1].object.material.color.set( color_2 );
+						intersects[aux-1].object.material.elementsNeedUpdate = true;
+						for(var x= 0; x < intersects[ aux-1 ].object.geometry.faces.length; x++){
+							if(vector.dot(intersects[ aux-1].object.geometry.faces[x].normal) <= 0){ 
+								intersects[ aux-1].object.geometry.faces.splice(x,1);
+								intersects[ aux-1 ].object.geometry.elementsNeedUpdate = true;
+							}
+						}
                     }                
-                }
+				}	
             }
-            console.log(arreglo.length);
-
-                  
+			
+			scene.add(mesh);
+            scene.add(mesh2);
+            scene.add(mesh3);
+			//scene.add(helper);
+            //scene.add(helper2);
+            //scene.add(helper3);
 			
 			camera.position.x = 70;
 			camera.position.y = 0;
