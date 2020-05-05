@@ -103,6 +103,7 @@
             var geometry3 = new THREE.BoxGeometry( 3, 3, 3 );
 			var meshMaterial = new THREE.MeshStandardMaterial( {color: 0x00ff00} );
 			var meshMaterial1 = new THREE.MeshStandardMaterial( {color: 0x0000ff} );
+			var meshMaterial2 = new THREE.MeshStandardMaterial( {color: 0xffffff} );
 			meshMaterial.vertexColors = THREE.FaceColors;
 			meshMaterial.side = THREE.FrontSide;
 
@@ -116,7 +117,7 @@
 
 			mesh = new THREE.Mesh( geometry, meshMaterial );
             mesh.position.z = -20;
-            mesh2 = new THREE.Mesh( geometry2, meshMaterial );
+            mesh2 = new THREE.Mesh( geometry2, meshMaterial2 );
             mesh3 = new THREE.Mesh( geometry3, meshMaterial1 );
             mesh2.position.x = -15;
             mesh2.position.z = -20;
@@ -148,7 +149,7 @@
                     raycaster.set( vector, vector2.normalize() ); //Origen y destino del raycaster
                     intersects = raycaster.intersectObjects( objetos ); 
                     var aux = intersects.length;
-					console.log(intersects);
+					//console.log(intersects);
                     arreglo.push(intersects);     	
 					if(aux > 0 && -50 < intersects[aux-1].object.position.z && 0.1 > intersects[aux-1].object.position.z && -24<= intersects[aux-1].object.position.x && 24>= intersects[aux-1].object.position.x && -18<= intersects[aux-1].object.position.y && 18 >= intersects[aux-1].object.position.y){ 
 						intersects[aux-1].object.material.color.set( color_2 );
@@ -163,6 +164,12 @@
 				}	
             }
 			
+			//var auxiliar = objetos[0];
+			//auxiliar.geometry.faces[0].color.set(0x00ff00);
+			objetos[0].geometry.faces[0].color.set(0x00ff00);
+			//console.log(auxiliar.geometry.faces[0].color);
+			console.log(objetos[0].geometry.faces[0].color);
+			//scene.add(auxiliar);
 			scene.add(mesh);
             scene.add(mesh2);
             scene.add(mesh3);
