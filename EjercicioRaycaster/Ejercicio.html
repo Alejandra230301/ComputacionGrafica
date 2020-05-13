@@ -48,7 +48,6 @@
 
             raycaster = new THREE.Raycaster();
             raycaster.far = 50;
-            raycaster2 = new THREE.Raycaster();
             
 			vector = new THREE.Vector3(0,0,1);
 			
@@ -118,14 +117,7 @@
 			var meshMaterial3 = new THREE.MeshStandardMaterial( {color: 0xa34de3} );
 			meshMaterial.vertexColors = THREE.FaceColors;
 			meshMaterial.side = THREE.FrontSide;
-
-            //var geometry = new THREE.PlaneGeometry( 70, 50, 32 );
-            var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
-            plane = new THREE.Mesh( planeGeometry, material );
-            plane.position.z = -50;
-
-           
-
+        
 
 			mesh = new THREE.Mesh( geometry, meshMaterial );
             mesh.position.z = -20;
@@ -151,9 +143,6 @@
             objetos.push(mesh3);
             objetos.push(mesh4);
 			
-            //group.add(plane);
-			//group.translateZ(-20);
-			//scene.add( group );
 
             var contador = 0;
             var arreglo = [];
@@ -164,11 +153,7 @@
                     raycaster.set( vector, vector2.normalize() ); //Origen y destino del raycaster
                     intersects = raycaster.intersectObjects( objetos ); 
                     var aux = intersects.length;
-					//console.log(intersects);
-                    arreglo.push(intersects);     	
-					if(aux > 0 /*&& -50 < intersects[aux-1].object.position.z && 0.1 > intersects[aux-1].object.position.z && -24<= intersects[aux-1].object.position.x && 24>= intersects[aux-1].object.position.x && -18<= intersects[aux-1].object.position.y && 18 >= intersects[aux-1].object.position.y*/){ 
-						//intersects[aux-1].object.material.color.set( color_2 );
-						intersects[aux-1].object.material.elementsNeedUpdate = true;
+					if(aux > 0 && -50 < intersects[aux-1].object.position.z && 0.1 > intersects[aux-1].object.position.z && -24<= intersects[aux-1].object.position.x && 24>= intersects[aux-1].object.position.x && -18<= intersects[aux-1].object.position.y && 18 >= intersects[aux-1].object.position.y){
 						for(var x= 0; x < intersects[ aux-1 ].object.geometry.faces.length; x++){
 							if(vector.dot(intersects[ aux-1].object.geometry.faces[x].normal) <= 0){ 
 								intersects[ aux-1].object.geometry.faces.splice(x,1);
@@ -178,7 +163,6 @@
                     }                
 				}	
             }
-
 			var posiciones = []; //ORDENAMIENTO DE IZQUIERDA A DERECHA PARA LAS FIGURAS TOMANDO COMO PARAMETRO EL VALOR DE X
 			var e = 0;
 			while(e<objetos.length){
