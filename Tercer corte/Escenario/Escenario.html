@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Escenario</title>
+	<style>
+            html, body { margin: 0; padding: 0; overflow: hidden; }
+            #info {
+                position: absolute;
+                padding: 10px;
+                width: 100%;
+                text-align: center;
+                color: #000000;
+            }
+        </style>
+  </head>
+  <body>
+  <div id="info">Escenario<br/>
+            Presentado por: Alejandra Pedraza<br/>
+        </div>
+    <script src="js/three.js"></script>
+    <script src="js/controls/OrbitControls.js"></script>
+    <script src='js/libs/dat.gui.min.js'></script>
+    <script src="js/csg.js"></script>
+    <script src="js/THREE.CSG.js"></script>
+    <script>
+        var scene, aspect, camera, camera2, renderer, controls, raycaster, mesh, vector, raycaster2, mesh2, mesh3, mesh4, vector2, rayo, intersects;
+        var objetos = [];
+        var mapWidth = 320, mapHeight = 240;
+        var w = window.innerWidth, h = window.innerHeight;
+        var frustumSize = 5;
+		var startTime = Date.now();
+		
+		init();
+		animate();
+	
+		function init(){
+			scene = new THREE.Scene();
+			scene.background = new THREE.Color( 0x000000);
+			aspect = window.innerWidth / window.innerHeight;
+			camera = new THREE.PerspectiveCamera( 20, aspect, 0.1, 1000);
+			camera2 = new THREE.PerspectiveCamera(50, 1.33, 0.1, 49);
+            camera2.position.y = 0;
+            camera2.position.z = -6;
+            camera2.rotation.x = 0.3;
+            var helper = new THREE.CameraHelper( camera2 );
+            scene.add( helper );
+			renderer = new THREE.WebGLRenderer({antialias: true});
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
+			controls = new THREE.OrbitControls( camera, renderer.domElement );
+
+            var size = 10;
+			var arrowSize = 1;
+			var divisions = size;
+			var origin = new THREE.Vector3( 0, 0, 0 );
+			var x = new THREE.Vector3( 1, 0, 0 );
+			var y = new THREE.Vector3( 0, 1, 0 );
+		  	var z = new THREE.Vector3( 0, 0, 1 );
+			var color1 = new THREE.Color( 0xFFFFFF );
+		  	var color2 = new THREE.Color( 0x333333 );
+		  	var colorR = new THREE.Color( 0xAA3333 );
+		  	var colorG = new THREE.Color( 0x33AA33 );
+		  	var colorB = new THREE.Color( 0x333366 );
+		  
+		  	//CREAR LAS GRILLAS PARA EL ESCENARIO
+		  	var axesHelper = new THREE.AxesHelper( size );
+		  	var gridHelperXY = new THREE.GridHelper( size, divisions, color1, color1);
+		  	var gridHelperXZ = new THREE.GridHelper( size, divisions, color2, color2 );
+		  	var gridHelperYZ = new THREE.GridHelper( size, divisions, color2, color2 );
+            
+            //ROTARLAS PARA QUE QUEDEN EN EL ESPACIO ADECUADO
+            gridHelperXY.rotateOnWorldAxis ( x, THREE.Math.degToRad(90) );
+            gridHelperXZ.rotateOnWorldAxis ( y, THREE.Math.degToRad(90) );
+            gridHelperYZ.rotateOnWorldAxis ( z, THREE.Math.degToRad(90) );
+            
+            //CREAR LAS FLECHAS QUE INDICAN LOS EJES DE COORDENADAS 3D
+            var arrowX = new THREE.ArrowHelper( x, origin, arrowSize, colorR );
+            var arrowY = new THREE.ArrowHelper( y, origin, arrowSize, colorG );
+            var arrowZ = new THREE.ArrowHelper( z, origin, arrowSize, colorB );
+            //LUZ
+            var lampara1 = new THREE.BoxBufferGeometry( 20, 1, 1 );
+            var material = new THREE.MeshBasicMaterial( {color: 0x71D5B3} );
+            var lampara2 = new THREE.SphereBufferGeometry( 1.5, 32, 32 );
+            var material2 = new THREE.MeshBasicMaterial( {color: 0xB9BB4A} );
+            var lampara3 = new THREE.SphereBufferGeometry( 0.5, 32, 32 );
+            var material3 = new THREE.MeshBasicMaterial( {color: 0xC6680D} );
+
+            var sphereSize = 1;
+            var light = new THREE.PointLight( 0x71D5B3, 0.3, -1, 2);
+            light.add( new THREE.Mesh( lampara1,  material ));
+            light.position.set( 0, 19, -30 );
+            scene.add( light );
+            var light1 = light.clone();
+            light1.rotation.y = Math.PI/2;
+            light1.position.x = -19;
+            light1.position.z = -10;
+            light1.position.y = 13;
+            var light2 = new  THREE.SpotLight( 0xB9BB4A, 30);
+            light2.add( new THREE.Mesh( lampara2,  material2 ));
+            light2.angle = 2.5;
+            light2.penumbra = 0.9;
+            light2.decay = 10;
+            light2.distance = 31;
+            light2.position.set( 0, 11.5, -46 );
+            light2.rotation.x = -2;
+            var light3 = new THREE.SpotLight( 0xE16F00, 6);
+            light3.angle = 2.95;
+            light3.penumbra = 0.2;
+            light3.decay = 2;
+            light3.distance = 35;
+            light3.position.z = -36;
+            light3.position.y = 10;
+            light3.position.x = 35;
+            light3.rotation.y = -0.8;
+            light3.rotation.z = -0.3;
+
+            var pointLightHelper = new THREE.SpotLightHelper( light2 )
+            //scene.add( pointLightHelper );
+            
+            
+            scene.add( light3 );
+            scene.add(light1);
+            scene.add(light2);
+
+
+
+
+            //MATERIALES
+            var materialPiso = new THREE.MeshStandardMaterial( {color: 0x004389} );
+            var materialPared = new THREE.MeshStandardMaterial( {color: 0xA5A5A5} );
+            var materialVentana = new THREE.MeshBasicMaterial( {color: 0x2A2A2A, opacity: 0.8} );
+            var materialLM = new THREE.MeshBasicMaterial( {color: 0xFFFFFF} );
+            var materialTubo = new THREE.MeshStandardMaterial( {color: 0xBBBBBB} );
+            //GEOMETRIAS
+            var geometryPiso = new THREE.BoxGeometry( 40, 1, 50 );
+            var piso = new THREE.Mesh( geometryPiso, materialPiso );
+            var geometryPared = new THREE.BoxGeometry( 40, 30, 1 );
+            var pared = new THREE.Mesh( geometryPared, materialPared );
+            var geometryTecho = new THREE.BoxGeometry( 40, 1, 50 );
+            var techo = new THREE.Mesh( geometryPiso, materialPared );
+            var geometryPared2 = new THREE.BoxGeometry( 1, 32, 50 );
+            var pared2 = new THREE.Mesh( geometryPared2, materialPared );
+            var geometryVentana = new THREE.BoxGeometry( 1, 7, 7 );
+            var ventana = new THREE.Mesh( geometryVentana, materialPared );
+            var geometryMuro = new THREE.BoxGeometry( 3, 32, 6 );
+            var muro = new THREE.Mesh( geometryMuro, materialPared );
+            var vidrio = new THREE.Mesh( geometryVentana, materialVentana );
+            var geometryMuro2 = new THREE.BoxGeometry( 37, 4, 5 );
+            var muro2 = new THREE.Mesh( geometryMuro2, materialPared );
+            var geometryTubo = new THREE.CylinderGeometry( 1, 1, 28, 32 );
+            var cylinder = new THREE.Mesh( geometryTubo, materialTubo );
+            scene.add( cylinder );
+            var pared3 = pared2.clone();
+            //UBICAR 
+            cylinder.position.y = 5;
+            cylinder.position.x = -16;
+            cylinder.position.z = -45;
+            vidrio.position.z = -35;
+            vidrio.position.x = 20;
+            vidrio.position.y = 10;
+            ventana.position.z = -35;
+            ventana.position.x = 19;
+            ventana.position.y = 10;
+            piso.position.z = -25;
+            piso.position.y = -10;
+            techo.position.z = -25;
+            techo.position.y = 20;
+            pared.position.z = -47.5;
+            pared.position.y = 5;
+            pared2.position.x = -20;
+            pared2.position.z = -25;
+            pared2.position.y = 6;
+            muro.position.y = 5;
+            muro.position.x = 18;
+            muro.position.z = -44;
+            muro2.position.y = 19;
+            muro2.position.z = -46;
+            muro2.position.x = -1;
+            var muro3 = muro.clone();
+            muro3.position.x = -18;
+            var pared3 = pared2.clone();
+            pared3.position.x = 19;
+
+            var par = THREE.CSG.fromMesh(pared3);
+            var ven = THREE.CSG.fromMesh(ventana);
+            var oper = par.subtract(ven);
+            var pared1 = THREE.CSG.toMesh(oper);
+            pared1.material = materialPared;
+            
+
+            scene.add( pared );
+            scene.add( pared2 );
+            scene.add( pared1 );
+            scene.add( piso );
+            scene.add(techo);
+            scene.add(muro);
+            scene.add(muro2);
+            scene.add(vidrio);
+            scene.add(muro3)
+
+            camera.position.x = 6;
+			camera.position.y = 21;
+		  	camera.position.z = 100;
+            camera.rotation.y = Math.PI/2;
+
+			
+		  	camera.lookAt( origin );
+        }
+
+
+function animate(){
+            
+            requestAnimationFrame( animate );
+			controls.update(); // required if controls.enableDamping = true, or if controls.autoRotate = true
+			render();
+		}
+        function render() {
+
+			//console.log(camera.position);
+            renderer.setViewport( 0, 0, w, h );
+            renderer.setScissor( 0, 0, w, h );
+            renderer.render( scene, camera );
+            renderer.setViewport( 10, 10, mapWidth, mapHeight );
+            renderer.setScissor(10, 10, mapWidth, mapHeight );
+            renderer.setScissorTest( true );
+            renderer.render( scene, camera2 );
+		}
+    </script>
+  </body>
+</html>
